@@ -29,7 +29,7 @@ const CoinAlign = styled.div`
     `;
 
 const HeadsButton = styled.button`
-    background-color: pink;
+    background-color: #df99a5;
     border-radius: 50%;
     height: 7rem;
     width: 7rem;
@@ -37,10 +37,18 @@ const HeadsButton = styled.button`
     box-shadow: 2px 2px black;
     cursor: pointer;
     outline: none;
+
+    :hover {
+        background-color: pink;
+    }
     `;
 
 const TailsButton = styled(HeadsButton)`
     background-color: #5D7B93;
+
+    :hover {
+        background-color: #7994aa;
+    }
 `;
 
 const Img = styled.img`

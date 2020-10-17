@@ -12,6 +12,11 @@ const WithdrawButton = styled.button`
     margin-left: 1rem;
     cursor: pointer;
     outline: none;
+
+    :hover {
+        background-color: #696969;
+        border: 1px solid pink;
+    } 
 `;
 
 const Text = styled.div`
@@ -56,7 +61,6 @@ export default function UserButton(props) {
     }
 
     const userWin = props.userWinnings;
-
 
     const withdrawMessage = 'Withdraw';
 

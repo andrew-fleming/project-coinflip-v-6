@@ -144,6 +144,18 @@ export default function Main() {
         coinflip.methods.withdrawUserWinnings().send(balance, {from: userAddress})
     }
 
+    var event = coinflip.events.result({
+        filter: {result: [0,1]}, // Using an array means OR: e.g. 20 or 23
+        fromBlock: 8893500
+    }, function(error, event){ console.log(event); })
+    .on('data', function(event){
+        console.log(event); // same results as the optional callback above
+    })
+    .on('changed', function(event){
+        // remove event from local database
+    })
+    .on('error', console.error);
+
 
     return (
         <div>
