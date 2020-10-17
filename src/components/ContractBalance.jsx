@@ -15,8 +15,6 @@ export default function ContractBalance(props) {
 
     const conBal = props.contractBalance
 
-    const balanceMessage = conBal;
-
     return (
         <>
         <Div1>

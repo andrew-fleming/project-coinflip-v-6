@@ -50,9 +50,19 @@ const Img = styled.img`
 
 
 
-export default function HeadsTails() {
+export default function HeadsTails(props) {
 
+    const handleHeads = () => {
+        let guess = 0
+        let bet = props.betAmt
+        props.flipTheCoin(guess, bet)
+    }
     
+    const handleTails = () => {
+        let guess = 1
+        let bet = props.betAmt
+        props.flipTheCoin(guess, bet)
+    }
 
     return (
         <Circle>
@@ -69,11 +79,11 @@ export default function HeadsTails() {
             </Text>
 
         <CoinAlign>
-            <HeadsButton >
+            <HeadsButton onClick={handleHeads}>
                 <Img src={ethLogo} alt='ethereum logo'/>
             </HeadsButton>
 
-            <TailsButton >
+            <TailsButton onClick={handleTails}>
                 <Img src={ethLogo} alt='ethereum logo'/>
             </TailsButton>
         </CoinAlign>

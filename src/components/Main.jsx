@@ -32,7 +32,7 @@ export default function Main() {
 
     const [userAddress, setUserAddress] = useState('');
     const [userBalance, setUserBalance] = useState('');
-    const [userWinningsBalance, setUserWinningsBalance] = useState('');
+    const [winningsBalance, setWinningsBalance] = useState('');
     const [contractBalance, setContractBalance] = useState('');
     const [owner, setOwner] = useState('');
     const [isOwner, setIsOwner] = useState(false);
@@ -55,10 +55,10 @@ export default function Main() {
         setUserBalance(Number.parseFloat(web3.utils.fromWei(userBal)).toPrecision(3))
     }
 
-    const loadUserWinningsBalance = async(user) => {
-        let config = {from: user}
-        let userWin = await coinflip.methods.getWinningsBalance().call({config})
-        setUserWinningsBalance(Number.parseFloat(web3.utils.fromWei(userWin)).toPrecision(4))
+    const loadWinningsBalance = async(userAdd) => {
+        let config = {from: userAdd}
+        let bal = await coinflip.methods.getWinningsBalance().call(config)
+        setWinningsBalance(Number.parseFloat(web3.utils.fromWei(bal)).toPrecision(3));
     }
 
     const loadOwner = async() => {
@@ -75,11 +75,14 @@ export default function Main() {
         }
     }
 
+    
+
+    //init
     const componentDidMount = async() => {
         await loadUserAddress().then(response => {
             setUserAddress(response)
             loadUserBalance(response)
-            loadUserWinningsBalance(response)
+            loadWinningsBalance(response)
             .then(loadOwner().then(response => {
                 setOwner(response)
                 const ownerAdd = response
@@ -91,6 +94,8 @@ export default function Main() {
             await loadContractBalance()
     }
 
+
+    //init
     useEffect(() => {
         if(userAddress.length === 0){
             componentDidMount()
@@ -98,6 +103,46 @@ export default function Main() {
     })
 
     
+     //set coinflip function with heads/tails functions
+     const flip = async(oneZero, bet) => {
+        let guess = oneZero
+        let betAmt = bet
+        let config = {
+            value: web3.utils.toWei(betAmt, 'ether'),
+            from: userAddress
+        }
+        coinflip.methods.flip(guess).send(config)
+    }
+
+    //set owner functions
+    const fundContract = (x) => {
+        let fundAmt = x
+        let config = {
+            value: web3.utils.toWei(fundAmt, 'ether'),
+            from: userAddress
+        }
+        coinflip.methods.fundContract().send(config)
+    }
+
+    const fundWinnings = (x) => {
+        let fundAmt = x
+        let config = {
+            value: web3.utils.toWei(fundAmt, 'ether'),
+            from: userAddress
+        }
+        coinflip.methods.fundWinnings().send(config)
+    }
+
+    const withdrawAll = () => {
+        var balance = contractBalance
+        coinflip.methods.withdrawAll().send(balance, {from: userAddress})
+    }
+
+    //user withdraw function
+    const withdrawUserWinnings = () => {
+        var balance = winningsBalance
+        coinflip.methods.withdrawUserWinnings().send(balance, {from: userAddress})
+    }
 
 
     return (
@@ -117,13 +162,17 @@ export default function Main() {
                     />
                     <MainCard 
                         userBalance={userBalance}
-                        userWinningsBalance={userWinningsBalance}
+                        userWinningsBalance={winningsBalance}
+                        withdrawUserWinnings={withdrawUserWinnings}
+                        flipCoin={flip}
                     />    
                 </AlignHalf>
                 <AlignQuarter>
                     <OwnerScreen 
+                        fundContract={fundContract}
+                        fundWinnings={fundWinnings}
+                        withdrawAll={withdrawAll}
                         isOwner={isOwner}
-
                     />
                 </AlignQuarter>
             </AlignContent>

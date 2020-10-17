@@ -57,24 +57,48 @@ const WithdrawAllButton = styled.button`
 
 export default function OwnerScreen(props) {
 
-    
+    const [contractAmt, setContractAmt] = useState('0');
+    const [winningsAmt, setWinningsAmt] = useState('0');
     const [visible, setVisible] = useState(false);
 
-   
+   //fund contract balance
+   const handleFundingContract = () => {
+        props.fundContract(contractAmt)
+    }
+
+    const handleInputContract = (event) => [
+        setContractAmt(event.target.value)
+    ]
+
+
+
+    //fund winnings balance
+    const handleFundingWinnings = () => {
+        props.fundWinnings(winningsAmt)
+    }
+
+    const handleInputWinnings = (event) => {
+        setWinningsAmt(event.target.value)
+    }
+
+
+    //withdrawAll button
+    const handleWithdrawAll = () => {
+        props.withdrawAll()
+    }
+
+
+    //toggle hide/show owner functions
+   const hideOwnerFunctions = () => {
+        if(openOwner === false){
+            alert('You are not the owner!')
+        } else {
+            setVisible(!visible)
+        }
+    }
 
     const openOwner = props.isOwner
 
-    
-
-
-   //toggle hide/show owner functions
-   const hideOwnerFunctions = () => {
-    if(openOwner === false){
-        alert('You are not the owner!')
-    } else {
-        setVisible(!visible)
-    }
-}
 
     const ownerFunctions = visible ? 
     <>
@@ -82,9 +106,9 @@ export default function OwnerScreen(props) {
             Fund Contract:
             <ContractInput 
                 placeholder='0.0'
-                
+                onChange={handleInputContract}
             />
-            <ContractButton >
+            <ContractButton onClick={handleFundingContract}>
                 Submit
             </ContractButton>
         </AlignDiv>
@@ -92,14 +116,14 @@ export default function OwnerScreen(props) {
             Fund Winnings:
             <WinningsInput 
                 placeholder='0.0'
-                   
+                onChange={handleInputWinnings}   
             />
-            <WinningsButton >
+            <WinningsButton onClick={handleFundingWinnings}>
                 Submit
             </WinningsButton>
         </AlignDiv>
         <AlignDiv>
-            <WithdrawAllButton >
+            <WithdrawAllButton onClick={handleWithdrawAll}>
                 Withdraw All
             </WithdrawAllButton>
         </AlignDiv>

@@ -51,7 +51,9 @@ const Line = styled.div`
 
 export default function UserButton(props) {
 
-    
+    const handleWithdraw = () => {
+        props.withdrawWin();
+    }
 
     const userWin = props.userWinnings;
 
@@ -69,7 +71,7 @@ export default function UserButton(props) {
         { userWin }
         </Text1>
         </AlignText>
-        <WithdrawButton >
+        <WithdrawButton onClick={handleWithdraw}>
             <Text2>
                 { withdrawMessage }
             </Text2>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import HeadsTails from './HeadsTails'
 
@@ -63,6 +63,16 @@ const Ether = styled.div`
 
 export default function BetForm(props) {
 
+    const [betAmt, setBetAmt] = useState('0');
+
+    const handleBetInput = (event) => {
+        setBetAmt(event.target.value)
+    }
+
+    const flipCoin = (oneZero, bet) => {
+        props.flip(oneZero, bet);
+    }
+
     let userBalance = props.userBalance
 
 
@@ -82,7 +92,7 @@ export default function BetForm(props) {
             <BottomAlign>
                 <Input 
                     placeholder='0.0'
-                    
+                    onChange={handleBetInput}
                 />
                 <Ether>
                     ETH
@@ -92,7 +102,8 @@ export default function BetForm(props) {
         </Circle>
 
         <HeadsTails 
-            
+            betAmt={betAmt}
+            flipTheCoin={flipCoin}
         />
 
         </>
