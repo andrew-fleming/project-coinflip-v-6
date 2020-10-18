@@ -10,6 +10,7 @@
     "@truffle/hdwallet-provider": "^1.1.1",
     "dotenv": "^8.2.0",
     "react": "^16.14.0",
+    "react-animations": "^1.0.0",
     "react-dom": "^16.14.0",
     "react-scripts": "3.4.3",
     "solc": "^0.5.16",

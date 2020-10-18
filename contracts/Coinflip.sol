@@ -18,7 +18,8 @@ contract Coinflip is usingProvable {
     mapping (bytes32 => address) private afterWaiting;
     
     event logNewProvableQuery(string description);
-    event result(address caller, uint256 amount, bool won);
+    event sentQueryId(address caller, bytes32 indexed queryId);
+    event callbackReceived(bytes32 indexed queryId, string description, uint256 amount);
     
     uint public contractBalance;
     uint256 constant NUM_RANDOM_BYTES_REQUESTED = 1;
@@ -39,7 +40,6 @@ contract Coinflip is usingProvable {
     
     
 function flip(uint256 oneZero) public payable {
-        //Minimum .001 eth to maximum 10 eth
         require(contractBalance > msg.value, "We don't have enough funds");
 
         //Calling provable library function
@@ -51,7 +51,8 @@ function flip(uint256 oneZero) public payable {
             GAS_FOR_CALLBACK
             );
         emit logNewProvableQuery("Message sent. Waiting for an answer...");
-        
+        emit sentQueryId(msg.sender, queryId);
+
         afterWaiting[queryId] = msg.sender;
 
 
@@ -75,13 +76,15 @@ function flip(uint256 oneZero) public payable {
         Bet memory postBet = waiting[_player];
         
         if(flipResult == postBet.headsTails){
+            //winner
             uint winAmount = SafeMath.mul(postBet.betValue, 2);
             contractBalance = SafeMath.sub(contractBalance, postBet.betValue);
             playerWinnings[_player] = SafeMath.add(playerWinnings[_player], winAmount);
-            emit result(_player, winAmount, true);
+            emit callbackReceived(_queryId, "Winner", postBet.betValue);
         } else {
+            //loser
             contractBalance = SafeMath.add(contractBalance, postBet.betValue);
-            emit result(_player, postBet.betValue, false);
+            emit callbackReceived(_queryId, "Loser", postBet.betValue);
         }
     }
     

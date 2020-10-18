@@ -24,7 +24,7 @@ const AlignHalf = styled.div`
 `;
 
 const web3 = new Web3(Web3.givenProvider)
-const contractAddress = '0xE7B308E35A71bd7b44521d4D1Cd9539Bdd356EA6'
+const contractAddress = '0x4599B5156176a3d59a753CB5825C40B8d307c1e6'
 const coinflip = new web3.eth.Contract(Coinflip.abi, contractAddress)
 
 
@@ -36,6 +36,8 @@ export default function Main() {
     const [contractBalance, setContractBalance] = useState('');
     const [owner, setOwner] = useState('');
     const [isOwner, setIsOwner] = useState(false);
+    const [sentQueryId, setSentQueryId] = useState('');
+    const [awaitingResponse, setAwaitingResponse] = useState(false);
 
    
 
@@ -112,7 +114,34 @@ export default function Main() {
             from: userAddress
         }
         coinflip.methods.flip(guess).send(config)
+        //set queryId to state
+        .on('receipt', function(receipt){
+            console.log(receipt)
+            setSentQueryId(receipt.events.sentQueryId.returnValues[1])
+            setAwaitingResponse(true)
+        })
     }
+
+    useEffect(() => {
+        if(awaitingResponse){
+            coinflip.events.callbackReceived({
+                fromBlock: 'latest'
+            }, function(error, event){ if(event.returnValues[0] === sentQueryId){
+                if(event.returnValues[1] === 'Winner'){
+                    alert('You won ' + web3.utils.fromWei(event.returnValues[2]) + ' ETH!')
+                    loadWinningsBalance(userAddress)
+                    loadContractBalance()
+                } else {
+                    alert('Sorry, you lost ' + web3.utils.fromWei(event.returnValues[2]) + ' ETH..')
+                    loadWinningsBalance(userAddress)
+                }
+            } setAwaitingResponse(false) })
+            setSentQueryId('')
+        }
+    }, [awaitingResponse, sentQueryId, contractBalance, winningsBalance, userAddress])
+
+
+
 
     //set owner functions
     const fundContract = (x) => {
@@ -144,17 +173,6 @@ export default function Main() {
         coinflip.methods.withdrawUserWinnings().send(balance, {from: userAddress})
     }
 
-    var event = coinflip.events.result({
-        filter: {result: [0,1]}, // Using an array means OR: e.g. 20 or 23
-        fromBlock: 8893500
-    }, function(error, event){ console.log(event); })
-    .on('data', function(event){
-        console.log(event); // same results as the optional callback above
-    })
-    .on('changed', function(event){
-        // remove event from local database
-    })
-    .on('error', console.error);
 
 
     return (
