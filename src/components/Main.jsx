@@ -138,7 +138,7 @@ export default function Main() {
             } setAwaitingResponse(false) })
             setSentQueryId('')
         }
-    }, [awaitingResponse, sentQueryId, contractBalance, winningsBalance, userAddress])
+    }, [awaitingResponse, sentQueryId])
 
 
 

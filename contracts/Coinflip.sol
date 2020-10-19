@@ -11,6 +11,7 @@ contract Coinflip is usingProvable {
         address playerAddress;
         uint betValue;
         uint headsTails;
+        uint setRandomPrice;
     }
     
     mapping(address => uint) private playerWinnings;
@@ -38,10 +39,12 @@ contract Coinflip is usingProvable {
         _;
     }
     
-    
 function flip(uint256 oneZero) public payable {
         require(contractBalance > msg.value, "We don't have enough funds");
 
+        //get price from provable
+        uint256 randomPrice = provable_getPrice("Random");
+        
         //Calling provable library function
         uint256 QUERY_EXECUTION_DELAY = 0;
         uint256 GAS_FOR_CALLBACK = 200000;
@@ -59,8 +62,10 @@ function flip(uint256 oneZero) public payable {
         //Adding user to mapping with address, bet, and queryID
         Bet memory newBetter;
         newBetter.playerAddress = msg.sender;
-        newBetter.betValue = msg.value;
+        //subtract price for callback
+        newBetter.betValue = msg.value; 
         newBetter.headsTails = oneZero;
+        newBetter.setRandomPrice = randomPrice;
 
         waiting[msg.sender] = newBetter;
     }
@@ -75,18 +80,23 @@ function flip(uint256 oneZero) public payable {
         
         Bet memory postBet = waiting[_player];
         
-        if(flipResult == postBet.headsTails){
-            //winner
-            uint winAmount = SafeMath.mul(postBet.betValue, 2);
-            contractBalance = SafeMath.sub(contractBalance, postBet.betValue);
-            playerWinnings[_player] = SafeMath.add(playerWinnings[_player], winAmount);
-            emit callbackReceived(_queryId, "Winner", postBet.betValue);
+        if(postBet.betValue == 0){
+            //for first free provable call^
         } else {
-            //loser
-            contractBalance = SafeMath.add(contractBalance, postBet.betValue);
-            emit callbackReceived(_queryId, "Loser", postBet.betValue);
+            if(flipResult == postBet.headsTails){
+                //winner
+                uint winAmount = SafeMath.sub(SafeMath.mul(postBet.betValue, 2), SafeMath.add(postBet.setRandomPrice, tx.gasprice)); 
+                contractBalance = SafeMath.sub(contractBalance, SafeMath.add(postBet.betValue, tx.gasprice));
+                playerWinnings[_player] = SafeMath.add(playerWinnings[_player], winAmount);
+                emit callbackReceived(_queryId, "Winner", postBet.betValue);
+            } else {
+                //loser
+                contractBalance = SafeMath.sub(SafeMath.add(contractBalance, postBet.betValue), (SafeMath.add(postBet.setRandomPrice, tx.gasprice))); 
+                emit callbackReceived(_queryId, "Loser", postBet.betValue);
+            }
         }
     }
+    
     
     function withdrawUserWinnings() public {
         require(playerWinnings[msg.sender] > 0, "No funds to withdraw");

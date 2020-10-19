@@ -33,6 +33,7 @@ export default function Directions() {
         setVisible(!visible)
     }
 
+
     const metamaskLink = <a href="metamask.io" >MetaMask</a>
     const etherFaucet = <a href="faucet.metamask.io">Ether Faucet</a>
 
@@ -50,7 +51,7 @@ export default function Directions() {
 
     return (
             <Ul>
-                <DirectionsButton onClick={hideDirections}>
+                <DirectionsButton onClick={hideDirections} >
                     Directions
                 </DirectionsButton>
                 { directions }
