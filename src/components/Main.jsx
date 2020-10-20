@@ -163,6 +163,10 @@ export default function Main() {
             from: userAddress
         }
         coinflip.methods.fundContract().send(config)
+        .once('receipt', function(receipt){
+            loadContractBalance()
+            loadUserBalance(userAddress)
+        })
     }
 
     const fundWinnings = (x) => {
@@ -172,6 +176,10 @@ export default function Main() {
             from: userAddress
         }
         coinflip.methods.fundWinnings().send(config)
+        .once('receipt', function(receipt){
+            loadWinningsBalance(userAddress)
+            loadUserBalance(userAddress)
+        })
     }
 
     const withdrawAll = () => {
