@@ -9,7 +9,7 @@ const MODAL_STYLES ={
     transform: 'translate(-50%, -50%)',
     backgroundColor: '#FFF',
     padding: '50px',
-    height: '6rem',
+    height: '9rem',
     width: '24rem',
     zIndex: 1000
 }

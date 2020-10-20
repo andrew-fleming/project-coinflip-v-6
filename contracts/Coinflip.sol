@@ -21,7 +21,8 @@ contract Coinflip is usingProvable {
     event logNewProvableQuery(string description);
     event sentQueryId(address caller, bytes32 indexed queryId);
     event callbackReceived(bytes32 indexed queryId, string description, uint256 amount);
-    
+    event userWithdrawal(address indexed caller, uint256 amount);
+
     uint public contractBalance;
     uint256 constant NUM_RANDOM_BYTES_REQUESTED = 1;
     
@@ -103,6 +104,7 @@ function flip(uint256 oneZero) public payable {
         uint toTransfer = playerWinnings[msg.sender];
         playerWinnings[msg.sender] = 0;
         msg.sender.transfer(toTransfer);
+        emit userWithdrawal(msg.sender, toTransfer);
     }
     
     function getWinningsBalance() public view returns(uint){

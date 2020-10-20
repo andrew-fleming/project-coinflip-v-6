@@ -25,7 +25,7 @@ const AlignHalf = styled.div`
 `;
 
 const web3 = new Web3(Web3.givenProvider)
-const contractAddress = '0x62523294390905EaFD0E04E5492E4c446083D7D3'
+const contractAddress = '0x9467766E6F60e10009cacDE771c3158fA6ACE69F'
 const coinflip = new web3.eth.Contract(Coinflip.abi, contractAddress)
 
 
@@ -38,7 +38,8 @@ export default function Main() {
     const [owner, setOwner] = useState('');
     const [isOwner, setIsOwner] = useState(false);
     const [sentQueryId, setSentQueryId] = useState('');
-    const [awaitingResponse, setAwaitingResponse] = useState(false);
+    const [awaitingCallbackResponse, setAwaitingCallbackResponse] = useState(false);
+    const [awaitingWithdrawal, setAwaitingWithdrawal] = useState(false);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [outcomeMessage, setOutcomeMessage] = useState('');
    
@@ -80,8 +81,10 @@ export default function Main() {
     }
 
     
+    //
+    //initialization
+    //
 
-    //init
     const componentDidMount = async() => {
         await loadUserAddress().then(response => {
             setUserAddress(response)
@@ -99,7 +102,7 @@ export default function Main() {
     }
 
 
-    //init
+    //watching for initialization^
     useEffect(() => {
         if(userAddress.length === 0){
             componentDidMount()
@@ -107,7 +110,10 @@ export default function Main() {
     })
 
     
+     //
      //set coinflip function with heads/tails functions
+     //
+
      const flip = async(oneZero, bet) => {
         let guess = oneZero
         let betAmt = bet
@@ -120,12 +126,14 @@ export default function Main() {
         .on('receipt', function(receipt){
             console.log(receipt)
             setSentQueryId(receipt.events.sentQueryId.returnValues[1])
-            setAwaitingResponse(true)
+            setAwaitingCallbackResponse(true)
         })
     }
 
+    //watching contract events for callback
+
     useEffect(() => {
-        if(awaitingResponse){
+        if(awaitingCallbackResponse){
             coinflip.events.callbackReceived({
                 fromBlock: 'latest'
             }, function(error, event){ if(event.returnValues[0] === sentQueryId){
@@ -138,13 +146,16 @@ export default function Main() {
                     loadWinningsBalance(userAddress)
                     loadContractBalance()
                 }
-            } setAwaitingResponse(false) })
+            } setAwaitingCallbackResponse(false) })
             setSentQueryId('')
         }
-    }, [awaitingResponse, sentQueryId, contractBalance])
+    }, [awaitingCallbackResponse, sentQueryId, contractBalance])
 
 
+    //
     //set owner functions
+    //
+
     const fundContract = (x) => {
         let fundAmt = x
         let config = {
@@ -172,9 +183,29 @@ export default function Main() {
     const withdrawUserWinnings = () => {
         var balance = winningsBalance
         coinflip.methods.withdrawUserWinnings().send(balance, {from: userAddress})
+        setAwaitingWithdrawal(true)
     }
 
-    //check for display message
+    //waiting to display success and amount of withdrawal
+    useEffect(() => {
+        if(awaitingWithdrawal === true){
+            coinflip.events.userWithdrawal({
+                fromBlock:'latest'
+            }, function(error, event){ if(event.returnValues[0] === userAddress){
+                console.log(event.returnValues[1])
+                setOutcomeMessage(web3.utils.fromWei(event.returnValues[1]) + ' ETH Successfully Withdrawn')
+                loadWinningsBalance()
+                loadUserBalance(userAddress)
+                }
+            })
+            setAwaitingWithdrawal(false)    
+        }
+    }, [awaitingWithdrawal, winningsBalance, userBalance, userAddress])
+
+
+    //
+    //display message to user after withdrawals and oracle callbacks 
+    //
     useEffect(() => {
         if(outcomeMessage !== ''){
             setModalIsOpen(true)
@@ -182,6 +213,7 @@ export default function Main() {
         return
     }, [outcomeMessage])
 
+    //reset modal and message variable after closing modal
     const modalMessageReset = () => {
         setModalIsOpen(false)
         setOutcomeMessage('')

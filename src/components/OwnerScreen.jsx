@@ -90,8 +90,9 @@ export default function OwnerScreen(props) {
 
     //toggle hide/show owner functions
    const hideOwnerFunctions = () => {
-        if(openOwner === false){
-            alert('You are not the owner!')
+        if(openOwner === false){ 
+                alert('You are not the owner!')
+                
         } else {
             setVisible(!visible)
         }

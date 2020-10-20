@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { bounce } from 'react-animations'
 
@@ -40,7 +40,7 @@ export default function Directions() {
         if(visible === true){
             setVisible(!visible)
         } else {
-        const timeout = setTimeout(() => {
+        setTimeout(() => {
             setVisible(!visible)
             }, 1400)
         }
