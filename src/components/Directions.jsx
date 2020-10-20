@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
-import styled from 'styled-components'
+import React, { useState, useEffect } from 'react'
+import styled, { keyframes } from 'styled-components'
+import { bounce } from 'react-animations'
 
+const bounceAnimation = keyframes`${bounce}`;
 
 const DirectionsButton = styled.button`
     text-shadow: .6px .6px pink;
@@ -13,6 +15,8 @@ const DirectionsButton = styled.button`
     font-size: 1.1rem;
     outline: none;
     cursor: pointer;
+    animation-duration: 1.5s;
+    animation-name: ${props => (props.isActive ? bounceAnimation : '')};
 `;
 
 const Ul = styled.ul`
@@ -24,15 +28,24 @@ const Li = styled.li`
     margin-top: 1.3rem;
 `;
 
+
 export default function Directions() {
 
     const [visible, setVisible] = useState(false);
+    const [isActive, setIsActive] = useState(false);
 
      //toggle directions on/off
-     const hideDirections = () => {
-        setVisible(!visible)
+     
+    const hideDirections = () => {
+        if(visible === true){
+            setVisible(!visible)
+        } else {
+        const timeout = setTimeout(() => {
+            setVisible(!visible)
+            }, 1400)
+        }
     }
-
+        
 
     const metamaskLink = <a href="metamask.io" >MetaMask</a>
     const etherFaucet = <a href="faucet.metamask.io">Ether Faucet</a>
@@ -51,7 +64,12 @@ export default function Directions() {
 
     return (
             <Ul>
-                <DirectionsButton onClick={hideDirections} >
+                <DirectionsButton 
+                    isActive={isActive}
+                    onClick={(event) => {
+                    setIsActive(!isActive)
+                    hideDirections()
+                }}>
                     Directions
                 </DirectionsButton>
                 { directions }

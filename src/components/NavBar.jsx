@@ -40,7 +40,7 @@ const Circle = styled.div`
     justify-content: space-between;
     align-items: center;
     height: 2.2rem;
-    width: 15rem;
+    width: 15.5rem;
     padding-left: .6rem;
     border-radius: .8rem;
     border: 1px solid #666666;
