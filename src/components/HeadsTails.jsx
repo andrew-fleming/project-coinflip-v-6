@@ -61,15 +61,23 @@ const Img = styled.img`
 export default function HeadsTails(props) {
 
     const handleHeads = () => {
+        if(props.betAmt <= .008){
+            alert('Bets must be higher than .008 ETH')
+        } else {
         let guess = 0
         let bet = props.betAmt
         props.flipTheCoin(guess, bet)
+        }
     }
     
     const handleTails = () => {
+        if(props.betAmt <= .008){
+            alert('Bets must be higher than .008 ETH')
+        } else {
         let guess = 1
         let bet = props.betAmt
         props.flipTheCoin(guess, bet)
+        }
     }
 
     return (

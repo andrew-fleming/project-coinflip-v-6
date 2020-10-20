@@ -6,6 +6,7 @@ import ContractBalance from './ContractBalance'
 import MainCard from './MainCard'
 import OwnerScreen from './OwnerScreen'
 import Directions from './Directions'
+import ModalWindow from './ModalWindow'
 import styled from 'styled-components'
 
 const AlignContent = styled.div`
@@ -24,7 +25,7 @@ const AlignHalf = styled.div`
 `;
 
 const web3 = new Web3(Web3.givenProvider)
-const contractAddress = '0x4599B5156176a3d59a753CB5825C40B8d307c1e6'
+const contractAddress = '0x62523294390905EaFD0E04E5492E4c446083D7D3'
 const coinflip = new web3.eth.Contract(Coinflip.abi, contractAddress)
 
 
@@ -38,7 +39,8 @@ export default function Main() {
     const [isOwner, setIsOwner] = useState(false);
     const [sentQueryId, setSentQueryId] = useState('');
     const [awaitingResponse, setAwaitingResponse] = useState(false);
-
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [outcomeMessage, setOutcomeMessage] = useState('');
    
 
     const loadUserAddress = async() => {
@@ -128,19 +130,18 @@ export default function Main() {
                 fromBlock: 'latest'
             }, function(error, event){ if(event.returnValues[0] === sentQueryId){
                 if(event.returnValues[1] === 'Winner'){
-                    alert('You won ' + web3.utils.fromWei(event.returnValues[2]) + ' ETH!')
+                    setOutcomeMessage('You Won ' + web3.utils.fromWei(event.returnValues[2]) + ' ETH!')
                     loadWinningsBalance(userAddress)
                     loadContractBalance()
                 } else {
-                    alert('Sorry, you lost ' + web3.utils.fromWei(event.returnValues[2]) + ' ETH..')
+                    setOutcomeMessage('You lost ' + web3.utils.fromWei(event.returnValues[2]) + ' ETH...')
                     loadWinningsBalance(userAddress)
+                    loadContractBalance()
                 }
             } setAwaitingResponse(false) })
             setSentQueryId('')
         }
-    }, [awaitingResponse, sentQueryId])
-
-
+    }, [awaitingResponse, sentQueryId, contractBalance])
 
 
     //set owner functions
@@ -173,6 +174,18 @@ export default function Main() {
         coinflip.methods.withdrawUserWinnings().send(balance, {from: userAddress})
     }
 
+    //check for display message
+    useEffect(() => {
+        if(outcomeMessage !== ''){
+            setModalIsOpen(true)
+        }
+        return
+    }, [outcomeMessage])
+
+    const modalMessageReset = () => {
+        setModalIsOpen(false)
+        setOutcomeMessage('')
+    }
 
 
     return (
@@ -181,7 +194,11 @@ export default function Main() {
                 userAddress={userAddress}
                 userBalance={userBalance}
             />
-            
+            <ModalWindow open={modalIsOpen}
+                onClose={() => modalMessageReset()
+                }>
+                    {outcomeMessage}
+            </ModalWindow>
             <AlignContent>
                 <AlignQuarter>
                     <Directions />
