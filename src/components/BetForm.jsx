@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import HeadsTails from './HeadsTails'
 
+import { useUser } from '../context/UserContext'
+
 const Circle = styled.div`
     position: relative;
     top: 1rem;
@@ -63,6 +65,11 @@ const Ether = styled.div`
 
 export default function BetForm(props) {
 
+    //user context
+    const {
+        userBalance
+    } = useUser()
+
     const [betAmt, setBetAmt] = useState('0');
 
     const handleBetInput = (event) => {
@@ -73,9 +80,6 @@ export default function BetForm(props) {
         props.flip(oneZero, bet);
     }
 
-    let userBalance = props.userBalance
-
-
     return (
         <>
         <Circle>
@@ -85,7 +89,7 @@ export default function BetForm(props) {
                 </Wager>
 
                 <Balance>
-                    Balance:  { userBalance }
+                    {`Balance:\xa0 ${userBalance}`}
                 </Balance>
             </TopAlign>
                     

@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import ethLogo from '../ethLogo.png'
+import ethLogo from '../assets/ethLogo.png'
 
 
 const Circle = styled.div`
@@ -94,16 +94,15 @@ export default function HeadsTails(props) {
                 </div>
             </Text>
 
-        <CoinAlign>
-            <HeadsButton onClick={handleHeads}>
-                <Img src={ethLogo} alt='ethereum logo'/>
-            </HeadsButton>
+            <CoinAlign>
+                <HeadsButton onClick={handleHeads}>
+                    <Img src={ethLogo} alt='ethereum logo'/>
+                </HeadsButton>
 
-            <TailsButton onClick={handleTails}>
-                <Img src={ethLogo} alt='ethereum logo'/>
-            </TailsButton>
-        </CoinAlign>
-
+                <TailsButton onClick={handleTails}>
+                    <Img src={ethLogo} alt='ethereum logo'/>
+                </TailsButton>
+            </CoinAlign>
         </Circle>
     )
 }

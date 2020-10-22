@@ -9,6 +9,9 @@ import Directions from './Directions'
 import ModalWindow from './ModalWindow'
 import styled from 'styled-components'
 
+import { useUser } from '../context/UserContext'
+import { useContract } from '../context/ContractContext'
+
 const AlignContent = styled.div`
     position: relative;
     top: 1rem;
@@ -31,18 +34,41 @@ const coinflip = new web3.eth.Contract(Coinflip.abi, contractAddress)
 
 export default function Main() {
 
-    const [userAddress, setUserAddress] = useState('');
-    const [userBalance, setUserBalance] = useState('');
-    const [winningsBalance, setWinningsBalance] = useState('');
-    const [contractBalance, setContractBalance] = useState('');
-    const [owner, setOwner] = useState('');
-    const [isOwner, setIsOwner] = useState(false);
-    const [sentQueryId, setSentQueryId] = useState('');
-    const [awaitingCallbackResponse, setAwaitingCallbackResponse] = useState(false);
-    const [awaitingWithdrawal, setAwaitingWithdrawal] = useState(false);
+    //fetching user context
+    const { 
+        userAddress, 
+        setUserAddress,
+        userBalance, 
+        setUserBalance,
+        winningsBalance,
+        setWinningsBalance,
+    } = useUser();
+    
+
+    //fetching contract context
+    const  {
+        contractBalance,
+        setContractBalance,
+        owner,
+        setOwner, 
+        isOwner,
+        setIsOwner,
+        sentQueryId,
+        setSentQueryId,
+        awaitingCallbackResponse,
+        setAwaitingCallbackResponse,
+        awaitingWithdrawal,
+        setAwaitingWithdrawal,
+    } = useContract();
+
+
+    //app state necessary only in this component hence no 'AppContext'
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [outcomeMessage, setOutcomeMessage] = useState('');
    
+    //
+    //functions necessary to fetch onchain data and user info
+    //
 
     const loadUserAddress = async() => {
         let accounts = await web3.eth.getAccounts()
@@ -93,7 +119,7 @@ export default function Main() {
             .then(loadOwner().then(response => {
                 setOwner(response)
                 const ownerAdd = response
-                const address = loadUserAddress().then(response => {
+                loadUserAddress().then(response => {
                     checkOwner(ownerAdd, response)
                 })
             }))
@@ -124,7 +150,6 @@ export default function Main() {
         coinflip.methods.flip(guess).send(config)
         //set queryId to state
         .on('receipt', function(receipt){
-            console.log(receipt)
             setSentQueryId(receipt.events.sentQueryId.returnValues[1])
             setAwaitingCallbackResponse(true)
         })
@@ -149,7 +174,14 @@ export default function Main() {
             } setAwaitingCallbackResponse(false) })
             setSentQueryId('')
         }
-    }, [awaitingCallbackResponse, sentQueryId, contractBalance])
+    }, [awaitingCallbackResponse, 
+        sentQueryId, 
+        contractBalance, 
+        loadContractBalance, 
+        loadWinningsBalance, 
+        setAwaitingCallbackResponse, 
+        setSentQueryId, 
+        userAddress])
 
 
     //
@@ -185,6 +217,10 @@ export default function Main() {
     const withdrawAll = () => {
         var balance = contractBalance
         coinflip.methods.withdrawAll().send(balance, {from: userAddress})
+        .on('receipt', function(receipt){
+            loadContractBalance()
+            loadUserBalance(userAddress)
+        })
     }
 
     //user withdraw function
@@ -200,7 +236,6 @@ export default function Main() {
             coinflip.events.userWithdrawal({
                 fromBlock:'latest'
             }, function(error, event){ if(event.returnValues[0] === userAddress){
-                console.log(event.returnValues[1])
                 setOutcomeMessage(web3.utils.fromWei(event.returnValues[1]) + ' ETH Successfully Withdrawn')
                 loadWinningsBalance()
                 loadUserBalance(userAddress)
@@ -230,26 +265,19 @@ export default function Main() {
 
     return (
         <div>
-            <NavBar 
-                userAddress={userAddress}
-                userBalance={userBalance}
-            />
+            <NavBar />
             <ModalWindow open={modalIsOpen}
                 onClose={() => modalMessageReset()
                 }>
-                    {outcomeMessage}
+                {outcomeMessage}
             </ModalWindow>
             <AlignContent>
                 <AlignQuarter>
                     <Directions />
                 </AlignQuarter>
                 <AlignHalf>
-                    <ContractBalance 
-                        contractBalance={contractBalance}
-                    />
+                    <ContractBalance />
                     <MainCard 
-                        userBalance={userBalance}
-                        userWinningsBalance={winningsBalance}
                         withdrawUserWinnings={withdrawUserWinnings}
                         flipCoin={flip}
                     />    
@@ -259,7 +287,6 @@ export default function Main() {
                         fundContract={fundContract}
                         fundWinnings={fundWinnings}
                         withdrawAll={withdrawAll}
-                        isOwner={isOwner}
                     />
                 </AlignQuarter>
             </AlignContent>

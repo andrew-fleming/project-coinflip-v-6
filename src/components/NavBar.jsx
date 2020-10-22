@@ -1,6 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
-import ethLogo from '../ethLogo.png'
+import ethLogo from '../assets/ethLogo.png'
+
+import { useUser } from '../context/UserContext'
 
 const Nav = styled.nav`
     border-bottom: 1px solid black;
@@ -72,15 +74,20 @@ const Div = styled.div`
 `;
 
 
-export default function Navbar(props) {
+export default function Navbar() {
 
-    const address = props.userAddress;
+    //user context
+    const {
+        userAddress,
+        userBalance
+    } = useUser()
+
+    //displaying only first/last five strings of userAddress
+    const address = userAddress;
     const add1 = address.toString().split('').slice(0, 5).join('');
     const add2 = address.toString().split('').slice(37, 42).join('');
     const outputAddress = add1 + '...' + add2;
     
-    const userBal = props.userBalance
-
     return (
         <Nav>
             <NavCenter>
@@ -90,7 +97,7 @@ export default function Navbar(props) {
                 </TitleLogo>
                 <Div>
                     <Circle >
-                         { userBal } ETH
+                         { userBalance } ETH
                             <CircleTwo>
                                 {outputAddress}
                             </CircleTwo>

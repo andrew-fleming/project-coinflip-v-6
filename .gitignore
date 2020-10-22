@@ -20,6 +20,7 @@
 .key
 .env
 .secret
+.trash
 truffle-config.js
 
 npm-debug.log*

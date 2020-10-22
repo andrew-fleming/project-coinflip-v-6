@@ -1,6 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import { useUser } from '../context/UserContext'
+
 const WithdrawButton = styled.button`
     position: relative;
     top: 5rem;
@@ -56,32 +58,31 @@ const Line = styled.div`
 
 export default function UserButton(props) {
 
+    //user context
+    const {
+        winningsBalance
+    } = useUser()
+
     const handleWithdraw = () => {
         props.withdrawWin();
     }
 
-    const userWin = props.userWinnings;
-
-    const withdrawMessage = 'Withdraw';
-
     return (
         <>
-        <Line/>
-        <AlignText>
-        <Text>
-            Your Winnings: 
-        </Text>
-        <Text1>
-        { userWin }
-        </Text1>
-        </AlignText>
-        <WithdrawButton onClick={handleWithdraw}>
-            <Text2>
-                { withdrawMessage }
-            </Text2>
-        </WithdrawButton>
-        
-
+            <Line/>
+            <AlignText>
+                <Text>
+                    Your Winnings: 
+                </Text>
+                <Text1>
+                    { winningsBalance }
+                </Text1>
+            </AlignText>
+            <WithdrawButton onClick={handleWithdraw}>
+                <Text2>
+                    Withdraw
+                </Text2>
+            </WithdrawButton>
         </>
     )
 }

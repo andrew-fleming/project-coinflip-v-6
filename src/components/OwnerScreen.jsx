@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 
+import { useContract } from '../context/ContractContext'
+
 const AlignDivButton = styled.div`
     display: flex;
     flex-direction: column;
@@ -57,6 +59,10 @@ const WithdrawAllButton = styled.button`
 
 export default function OwnerScreen(props) {
 
+    const {
+        isOwner
+    } = useContract()
+
     const [contractAmt, setContractAmt] = useState('0');
     const [winningsAmt, setWinningsAmt] = useState('0');
     const [visible, setVisible] = useState(false);
@@ -70,8 +76,6 @@ export default function OwnerScreen(props) {
         setContractAmt(event.target.value)
     ]
 
-
-
     //fund winnings balance
     const handleFundingWinnings = () => {
         props.fundWinnings(winningsAmt)
@@ -79,6 +83,7 @@ export default function OwnerScreen(props) {
 
     const handleInputWinnings = (event) => {
         setWinningsAmt(event.target.value)
+        
     }
 
 
@@ -88,19 +93,17 @@ export default function OwnerScreen(props) {
     }
 
 
+    //const openOwner = props.isOwner
+
     //toggle hide/show owner functions
    const hideOwnerFunctions = () => {
-        if(openOwner === false){ 
+        if(isOwner === false){ 
                 alert('You are not the owner!')
                 
         } else {
             setVisible(!visible)
         }
     }
-
-    const openOwner = props.isOwner
-
-
     const ownerFunctions = visible ? 
     <>
         <AlignDiv>

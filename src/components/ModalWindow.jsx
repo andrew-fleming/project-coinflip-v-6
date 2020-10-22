@@ -1,7 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
 
-
 const MODAL_STYLES ={
     position: 'fixed',
     top: '50%',

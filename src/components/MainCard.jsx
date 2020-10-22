@@ -16,9 +16,6 @@ const Card = styled.div`
 
 
 export default function MainCard(props) {
-
-    //passing userWinnings balance props from Main to UserButton
-    const winningsBalance = props.userWinningsBalance
     
     //passing withdraw function from Main as a prop to userButton
     const withdrawWinnings = () => {
@@ -37,7 +34,6 @@ export default function MainCard(props) {
                 flip={flipTheCoin}
             />
             <UserButton 
-                userWinnings={winningsBalance}
                 withdrawWin={withdrawWinnings}
             />
         </Card>
