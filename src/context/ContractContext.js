@@ -1,6 +1,12 @@
 import React, { useContext } from 'react'
 
 export const ContractContext = React.createContext({
+    contractAddress: '',
+    setContractAddress: '',
+    coinflip: '',
+    setCoinflip: () => {},
+    web3: '',
+    setWeb3: () => {},
     contractBalance: '',
     setContractBalance: () => {},
     owner: '',

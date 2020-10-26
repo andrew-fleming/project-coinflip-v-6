@@ -27,6 +27,7 @@ const AlignHalf = styled.div`
     width: 50%
 `;
 
+
 const web3 = new Web3(Web3.givenProvider)
 const contractAddress = '0x9467766E6F60e10009cacDE771c3158fA6ACE69F'
 const coinflip = new web3.eth.Contract(Coinflip.abi, contractAddress)
@@ -49,9 +50,7 @@ export default function Main() {
     const  {
         contractBalance,
         setContractBalance,
-        owner,
         setOwner, 
-        isOwner,
         setIsOwner,
         sentQueryId,
         setSentQueryId,
