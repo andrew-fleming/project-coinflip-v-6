@@ -51,7 +51,8 @@ export default function Main() {
         contractBalance,
         setContractBalance,
         setOwner, 
-        setIsOwner,
+        setIsOwner, 
+        setNetwork,
         sentQueryId,
         setSentQueryId,
         awaitingCallbackResponse,
@@ -59,6 +60,23 @@ export default function Main() {
         awaitingWithdrawal,
         setAwaitingWithdrawal,
     } = useContract();
+
+    const fetchNetwork = async() => {
+        let num = await web3.currentProvider.chainId;
+        if(num === '0x1'){
+            setNetwork('Mainnet')
+        } else if(num === '0x3'){
+            setNetwork('Ropsten')
+        } else if(num === '0x4'){
+            setNetwork('Rinkeby')
+        } else if(num === '0x5'){
+            setNetwork('Goerli')
+        } else if(num === '0x42'){
+            setNetwork('Kovan')
+        } else {
+            setNetwork('N/A')
+        }
+    }
 
 
     //app state necessary only in this component hence no 'AppContext'
@@ -124,6 +142,7 @@ export default function Main() {
             }))
             })
             await loadContractBalance()
+            await fetchNetwork()
     }
 
 

@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import ethLogo from '../assets/ethLogo.png'
 
 import { useUser } from '../context/UserContext'
+import { useContract }  from '../context/ContractContext'
 
 const Nav = styled.nav`
     border-bottom: 1px solid black;
@@ -73,6 +74,11 @@ const Div = styled.div`
     align-items: center;
 `;
 
+const NetworkDiv = styled.div`
+    margin-right: 2rem;
+    font-size: 1.3rem;
+`;
+
 
 export default function Navbar() {
 
@@ -81,6 +87,11 @@ export default function Navbar() {
         userAddress,
         userBalance
     } = useUser()
+
+    //contract context
+    const {
+        network
+    } = useContract()
 
     //displaying only first/last five strings of userAddress
     const address = userAddress;
@@ -96,6 +107,9 @@ export default function Navbar() {
                         <H1> Coinflip dApp </H1>
                 </TitleLogo>
                 <Div>
+                    <NetworkDiv>
+                        { network }
+                    </NetworkDiv>
                     <Circle >
                          { userBalance } ETH
                             <CircleTwo>

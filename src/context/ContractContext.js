@@ -7,6 +7,8 @@ export const ContractContext = React.createContext({
     setCoinflip: () => {},
     web3: '',
     setWeb3: () => {},
+    network: '',
+    setNetwork: '',
     contractBalance: '',
     setContractBalance: () => {},
     owner: '',

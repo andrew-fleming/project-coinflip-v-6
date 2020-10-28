@@ -34,6 +34,7 @@ function App() {
   //contract state
   const [contractBalance, setContractBalance] = useState('');
   const [owner, setOwner] = useState('');
+  const [network, setNetwork] = useState('');
   const [isOwner, setIsOwner] = useState(false);
   const [sentQueryId, setSentQueryId] = useState('');
   const [awaitingCallbackResponse, setAwaitingCallbackResponse] = useState('');
@@ -46,6 +47,8 @@ function App() {
     setOwner, 
     isOwner,
     setIsOwner,
+    network, 
+    setNetwork,
     sentQueryId,
     setSentQueryId,
     awaitingCallbackResponse,
