@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Coinflip from '../abi/Coinflip.json'
 import Web3 from 'web3'
 import NavBar from './NavBar'
@@ -29,7 +29,7 @@ const AlignHalf = styled.div`
 
 
 const web3 = new Web3(Web3.givenProvider)
-const contractAddress = '0x9467766E6F60e10009cacDE771c3158fA6ACE69F'
+const contractAddress = '0x4b6F8E0B8a51e2cFfC529a58B15004F6EB68A62E'
 const coinflip = new web3.eth.Contract(Coinflip.abi, contractAddress)
 
 
@@ -61,7 +61,7 @@ export default function Main() {
         setAwaitingWithdrawal,
     } = useContract();
 
-    const fetchNetwork = async() => {
+    const fetchNetwork = useCallback(async() => {
         let num = await web3.currentProvider.chainId;
         if(num === '0x1'){
             setNetwork('Mainnet')
@@ -76,7 +76,7 @@ export default function Main() {
         } else {
             setNetwork('N/A')
         }
-    }
+    }, [setNetwork])
 
 
     //app state necessary only in this component hence no 'AppContext'
@@ -87,48 +87,48 @@ export default function Main() {
     //functions necessary to fetch onchain data and user info
     //
 
-    const loadUserAddress = async() => {
+    const loadUserAddress = useCallback(async() => {
         let accounts = await web3.eth.getAccounts()
         let account = accounts[0]
         return account
-    }
+    }, [])
 
-    const loadContractBalance = async() => {
+    const loadContractBalance = useCallback(async() => {
         let balance = await coinflip.methods.contractBalance().call()
         setContractBalance(web3.utils.fromWei(balance))
-    }
+    }, [setContractBalance])
 
-    const loadUserBalance = async(user) => {
+    const loadUserBalance = useCallback(async(user) => {
         let userBal = await web3.eth.getBalance(user)
         setUserBalance(Number.parseFloat(web3.utils.fromWei(userBal)).toPrecision(3))
-    }
+    }, [setUserBalance])
 
-    const loadWinningsBalance = async(userAdd) => {
+    const loadWinningsBalance = useCallback(async(userAdd) => {
         let config = {from: userAdd}
         let bal = await coinflip.methods.getWinningsBalance().call(config)
         setWinningsBalance(Number.parseFloat(web3.utils.fromWei(bal)).toPrecision(3));
-    }
+    }, [setWinningsBalance])
 
-    const loadOwner = async() => {
+    const loadOwner = useCallback(async() => {
         let theOwner = await coinflip.methods.owner().call()
         setOwner(theOwner)
         return theOwner
-    }
+    }, [setOwner])
 
-    const checkOwner = (add, own) => {
+    const checkOwner = useCallback((add, own) => {
         if(add === own){
             setIsOwner(true)
         } else {
             setIsOwner(false)
         }
-    }
+    }, [setIsOwner])
 
     
     //
     //initialization
     //
 
-    const componentDidMount = async() => {
+    const componentDidMount = useCallback(async() => {
         await loadUserAddress().then(response => {
             setUserAddress(response)
             loadUserBalance(response)
@@ -136,6 +136,7 @@ export default function Main() {
             .then(loadOwner().then(response => {
                 setOwner(response)
                 const ownerAdd = response
+                console.log(response)
                 loadUserAddress().then(response => {
                     checkOwner(ownerAdd, response)
                 })
@@ -143,15 +144,25 @@ export default function Main() {
             })
             await loadContractBalance()
             await fetchNetwork()
-    }
+    }, 
+        [loadUserAddress, 
+        setUserAddress, 
+        loadUserBalance, 
+        loadWinningsBalance, 
+        loadOwner, 
+        setOwner,
+        checkOwner,
+        fetchNetwork,
+        loadContractBalance
+    ])
 
 
     //watching for initialization^
     useEffect(() => {
-        if(userAddress.length === 0){
+        if(userAddress === ''){
             componentDidMount()
         }
-    })
+    }, [componentDidMount, userAddress])
 
     
      //
@@ -261,7 +272,7 @@ export default function Main() {
             })
             setAwaitingWithdrawal(false)    
         }
-    }, [awaitingWithdrawal, winningsBalance, userBalance, userAddress])
+    }, [awaitingWithdrawal, winningsBalance, userBalance, userAddress, loadUserBalance, loadWinningsBalance, setAwaitingWithdrawal])
 
 
     //
