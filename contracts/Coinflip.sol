@@ -1,7 +1,7 @@
 import "./provableAPI_0.5.sol";
-import "./SafeMath.sol";
+import './SafeMath.sol';
 
-pragma solidity =0.5.16;
+pragma solidity ^0.5.16;
 
 contract Coinflip is usingProvable {
     
@@ -82,6 +82,7 @@ function flip(uint256 oneZero) public payable {
         Bet memory postBet = waiting[_player];
         
         if(postBet.betValue == 0){
+            contractBalance = SafeMath.sub(contractBalance, tx.gasprice);
             //for first free provable call^
         } else {
             if(flipResult == postBet.headsTails){
