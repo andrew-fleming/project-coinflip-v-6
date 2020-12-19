@@ -50,8 +50,10 @@ export default function Main() {
     const  {
         contractBalance,
         setContractBalance,
+        owner,
         setOwner, 
         setIsOwner, 
+        network,
         setNetwork,
         sentQueryId,
         setSentQueryId,
@@ -115,6 +117,7 @@ export default function Main() {
         return theOwner
     }, [setOwner])
 
+    /*
     const checkOwner = useCallback((add, own) => {
         if(add === own){
             setIsOwner(true)
@@ -122,7 +125,7 @@ export default function Main() {
             setIsOwner(false)
         }
     }, [setIsOwner])
-
+*/
     
     //
     //initialization
@@ -133,17 +136,10 @@ export default function Main() {
             setUserAddress(response)
             loadUserBalance(response)
             loadWinningsBalance(response)
-            .then(loadOwner().then(response => {
-                setOwner(response)
-                const ownerAdd = response
-                console.log(response)
-                loadUserAddress().then(response => {
-                    checkOwner(ownerAdd, response)
-                })
-            }))
             })
-            await loadContractBalance()
-            await fetchNetwork()
+        await loadOwner().then(response => {
+            setOwner(response)
+        })
     }, 
         [loadUserAddress, 
         setUserAddress, 
@@ -151,25 +147,58 @@ export default function Main() {
         loadWinningsBalance, 
         loadOwner, 
         setOwner,
-        checkOwner,
-        fetchNetwork,
-        loadContractBalance
     ])
 
 
-    //watching for initialization^
+    /**
+     * @notice This hook acts as an initializer a la componentDidMount. 
+     *         
+     */
     useEffect(() => {
         if(userAddress === ''){
             componentDidMount()
         }
     }, [componentDidMount, userAddress])
 
+
+
+    /**
+     * @notice This hook loads the network and balance of the contract.
+     * 
+     */
+    useEffect(() => {
+        if(network.length === 0){
+            fetchNetwork()
+            loadContractBalance()
+            loadOwner().then(response => {
+                setOwner(response)
+            })
+
+        }
+    }, [network, fetchNetwork, loadContractBalance, loadOwner, setOwner])
+
+
+    /**
+     * @notice This hook specifically checks if the user's address matches with 
+     *         the owner of the contract.
+     */
+    useEffect(() => {
+        if(userAddress.length !== 0 && owner.length !== 0){
+            if(userAddress === owner){
+                setIsOwner(true)
+            } else {
+                setIsOwner(false)
+            }
+        }
+    }, [userAddress, owner, setIsOwner])
+    
     
      //
      //set coinflip function with heads/tails functions
      //
 
      const flip = async(oneZero, bet) => {
+        setAwaitingCallbackResponse(false)
         let guess = oneZero
         let betAmt = bet
         let config = {
@@ -182,6 +211,12 @@ export default function Main() {
             setSentQueryId(receipt.events.sentQueryId.returnValues[1])
             setAwaitingCallbackResponse(true)
         })
+    }
+
+     //reset modal and message variable after closing modal
+     const modalMessageReset = () => {
+        setModalIsOpen(false)
+        setOutcomeMessage('')
     }
 
     //watching contract events for callback
@@ -284,12 +319,6 @@ export default function Main() {
         }
         return
     }, [outcomeMessage])
-
-    //reset modal and message variable after closing modal
-    const modalMessageReset = () => {
-        setModalIsOpen(false)
-        setOutcomeMessage('')
-    }
 
 
     return (
