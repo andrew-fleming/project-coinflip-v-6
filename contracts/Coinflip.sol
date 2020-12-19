@@ -1,10 +1,9 @@
-import "./provableAPI_0.5.sol";
+pragma solidity =0.5.16;
+
+import './provableAPI_0.5.sol';
 import './SafeMath.sol';
 
-pragma solidity ^0.5.16;
-
 contract Coinflip is usingProvable {
-    
     using SafeMath for uint;
     
     struct Bet {
@@ -14,9 +13,9 @@ contract Coinflip is usingProvable {
         uint setRandomPrice;
     }
     
-    mapping(address => uint) private playerWinnings;
-    mapping (address => Bet) private waiting;
-    mapping (bytes32 => address) private afterWaiting;
+    mapping(address => uint) public playerWinnings;
+    mapping (address => Bet) public waiting;
+    mapping (bytes32 => address) public afterWaiting;
     
     event logNewProvableQuery(string description);
     event sentQueryId(address caller, bytes32 indexed queryId);
@@ -26,22 +25,21 @@ contract Coinflip is usingProvable {
     uint public contractBalance;
     uint256 constant NUM_RANDOM_BYTES_REQUESTED = 1;
     
-    address payable public owner = msg.sender;
+   address payable public owner = msg.sender;
 
-    
     constructor() public payable{
         owner = msg.sender;
         contractBalance = msg.value;
     }
     
-    
     modifier onlyOwner() {
-        require(owner == msg.sender);
+        require(msg.sender == owner);
         _;
     }
     
 function flip(uint256 oneZero) public payable {
         require(contractBalance > msg.value, "We don't have enough funds");
+
 
         //get price from provable
         uint256 randomPrice = provable_getPrice("Random");
@@ -58,6 +56,8 @@ function flip(uint256 oneZero) public payable {
         emit sentQueryId(msg.sender, queryId);
 
         afterWaiting[queryId] = msg.sender;
+        
+        contractBalance += (msg.value - 200000 wei);
 
 
         //Adding user to mapping with address, bet, and queryID
@@ -67,11 +67,11 @@ function flip(uint256 oneZero) public payable {
         newBetter.betValue = msg.value; 
         newBetter.headsTails = oneZero;
         newBetter.setRandomPrice = randomPrice;
-
+        
         waiting[msg.sender] = newBetter;
     }
     
-    function __callback(bytes32 _queryId, string memory _result /*bytes memory _proof*/) public {
+    function __callback(bytes32 _queryId, string memory _result) public {
         require(msg.sender == provable_cbAddress());
         
         uint256 flipResult = SafeMath.mod(uint256(keccak256(abi.encodePacked(_result))), 2);
@@ -80,20 +80,23 @@ function flip(uint256 oneZero) public payable {
         address _player = afterWaiting[_queryId];
         
         Bet memory postBet = waiting[_player];
-        
-        if(postBet.betValue == 0){
-            contractBalance = SafeMath.sub(contractBalance, tx.gasprice);
-            //for first free provable call^
-        } else {
+
+    
+         if(postBet.betValue != 0) {
             if(flipResult == postBet.headsTails){
                 //winner
-                uint winAmount = SafeMath.sub(SafeMath.mul(postBet.betValue, 2), SafeMath.add(postBet.setRandomPrice, tx.gasprice)); 
-                contractBalance = SafeMath.sub(contractBalance, SafeMath.add(postBet.betValue, tx.gasprice));
-                playerWinnings[_player] = SafeMath.add(playerWinnings[_player], winAmount);
+                // uint winAmount = SafeMath.sub(SafeMath.mul(postBet.betValue, 2), SafeMath.add(postBet.setRandomPrice, tx.gasprice)); 
+                //contractBalance = SafeMath.sub(contractBalance, SafeMath.add(postBet.betValue, tx.gasprice));
+                //playerWinnings[_player] = SafeMath.add(playerWinnings[_player], winAmount);
+
+                uint winAmount = (postBet.betValue * 2) - 200000 wei;
+                contractBalance -= (postBet.betValue + postBet.setRandomPrice);
+                playerWinnings[_player] += winAmount;
                 emit callbackReceived(_queryId, "Winner", postBet.betValue);
             } else {
                 //loser
-                contractBalance = SafeMath.sub(SafeMath.add(contractBalance, postBet.betValue), (SafeMath.add(postBet.setRandomPrice, tx.gasprice))); 
+                //contractBalance = SafeMath.sub(SafeMath.add(contractBalance, postBet.betValue), (SafeMath.add(postBet.setRandomPrice, tx.gasprice)));
+                contractBalance -= postBet.setRandomPrice;
                 emit callbackReceived(_queryId, "Loser", postBet.betValue);
             }
         }
