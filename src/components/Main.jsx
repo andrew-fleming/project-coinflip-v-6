@@ -29,7 +29,7 @@ const AlignHalf = styled.div`
 
 
 const web3 = new Web3(Web3.givenProvider)
-const contractAddress = '0x010900b85fF7Ad82C83cB25dC92F4A21dE35a73b'
+const contractAddress = '0x95404f126eb6B2435E427f36eDee0bCe63472Bf5'
 const coinflip = new web3.eth.Contract(Coinflip.abi, contractAddress)
 
 

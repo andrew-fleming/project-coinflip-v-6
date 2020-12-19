@@ -89,18 +89,27 @@ function flip(uint256 oneZero) public payable {
     
         if(flipResult == postBet.headsTails){
             //winner
-            // uint winAmount = SafeMath.sub(SafeMath.mul(postBet.betValue, 2), SafeMath.add(postBet.setRandomPrice, tx.gasprice)); 
-            //contractBalance = SafeMath.sub(contractBalance, SafeMath.add(postBet.betValue, tx.gasprice));
-            //playerWinnings[_player] = SafeMath.add(playerWinnings[_player], winAmount);
+            uint winAmount = SafeMath.sub(SafeMath.mul(postBet.betValue, 2), postBet.setRandomPrice); 
+            contractBalance = SafeMath.sub(contractBalance, postBet.betValue);
+            playerWinnings[_player] = SafeMath.add(playerWinnings[_player], winAmount);
+           
+            /**
+            *         @notice The following commented commands mirror the above commands sans SafeMath for readability.
+            *          
+            *          uint winAmount = (postBet.betValue * 2) - postBet.setRandomPrice;
+            *          contractBalance -= postBet.betValue;
+            *          playerWinnings[_player] += winAmount;
+             */
 
-            uint winAmount = (postBet.betValue * 2) - postBet.setRandomPrice;
-            contractBalance -= postBet.betValue;
-            playerWinnings[_player] += winAmount;
             emit callbackReceived(_queryId, "Winner", postBet.betValue);
         } else {
             //loser
-            //contractBalance = SafeMath.sub(SafeMath.add(contractBalance, postBet.betValue), (SafeMath.add(postBet.setRandomPrice, tx.gasprice)));
-            contractBalance += (postBet.betValue - postBet.setRandomPrice);
+            contractBalance = SafeMath.add(contractBalance, SafeMath.sub(postBet.betValue, postBet.setRandomPrice));
+            /**
+            *           @notice For readability--see previous comment.
+            *
+            *          contractBalance += (postBet.betValue - postBet.setRandomPrice);
+             */
             emit callbackReceived(_queryId, "Loser", postBet.betValue);
         }
     }
@@ -123,7 +132,9 @@ function flip(uint256 oneZero) public payable {
         return playerWinnings[msg.sender];
     }
     
-    //Owner functions
+    /**
+    *@notice The following functions are reserved for the owner of the contract.
+     */
     
     function fundContract() public payable onlyOwner {
         contractBalance = SafeMath.add(contractBalance, msg.value);
