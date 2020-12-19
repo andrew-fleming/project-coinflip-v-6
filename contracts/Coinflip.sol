@@ -23,9 +23,13 @@ contract Coinflip is usingProvable {
     event userWithdrawal(address indexed caller, uint256 amount);
 
     uint public contractBalance;
+    
+    uint256 constant GAS_FOR_CALLBACK = 200000;
     uint256 constant NUM_RANDOM_BYTES_REQUESTED = 1;
     
    address payable public owner = msg.sender;
+   
+   bool public freeCallback = true;
 
     constructor() public payable{
         owner = msg.sender;
@@ -39,14 +43,18 @@ contract Coinflip is usingProvable {
     
 function flip(uint256 oneZero) public payable {
         require(contractBalance > msg.value, "We don't have enough funds");
+        uint256 randomPrice;
 
+        //determine if this is first callback then declare Provable/gas price
+        if(freeCallback == false){
+            randomPrice = getQueryPrice();
+        } else {
+            freeCallback = false;
+            randomPrice = 0;
+        }
 
-        //get price from provable
-        uint256 randomPrice = provable_getPrice("Random");
-        
         //Calling provable library function
         uint256 QUERY_EXECUTION_DELAY = 0;
-        uint256 GAS_FOR_CALLBACK = 200000;
         bytes32 queryId = provable_newRandomDSQuery(
             QUERY_EXECUTION_DELAY,
             NUM_RANDOM_BYTES_REQUESTED,
@@ -56,14 +64,10 @@ function flip(uint256 oneZero) public payable {
         emit sentQueryId(msg.sender, queryId);
 
         afterWaiting[queryId] = msg.sender;
-        
-        contractBalance += (msg.value - 200000 wei);
-
 
         //Adding user to mapping with address, bet, and queryID
         Bet memory newBetter;
         newBetter.playerAddress = msg.sender;
-        //subtract price for callback
         newBetter.betValue = msg.value; 
         newBetter.headsTails = oneZero;
         newBetter.setRandomPrice = randomPrice;
@@ -74,6 +78,7 @@ function flip(uint256 oneZero) public payable {
     function __callback(bytes32 _queryId, string memory _result) public {
         require(msg.sender == provable_cbAddress());
         
+        //turn number into 1 or 0
         uint256 flipResult = SafeMath.mod(uint256(keccak256(abi.encodePacked(_result))), 2);
 
         //linking new mapping with new struct
@@ -82,24 +87,27 @@ function flip(uint256 oneZero) public payable {
         Bet memory postBet = waiting[_player];
 
     
-         if(postBet.betValue != 0) {
-            if(flipResult == postBet.headsTails){
-                //winner
-                // uint winAmount = SafeMath.sub(SafeMath.mul(postBet.betValue, 2), SafeMath.add(postBet.setRandomPrice, tx.gasprice)); 
-                //contractBalance = SafeMath.sub(contractBalance, SafeMath.add(postBet.betValue, tx.gasprice));
-                //playerWinnings[_player] = SafeMath.add(playerWinnings[_player], winAmount);
+        if(flipResult == postBet.headsTails){
+            //winner
+            // uint winAmount = SafeMath.sub(SafeMath.mul(postBet.betValue, 2), SafeMath.add(postBet.setRandomPrice, tx.gasprice)); 
+            //contractBalance = SafeMath.sub(contractBalance, SafeMath.add(postBet.betValue, tx.gasprice));
+            //playerWinnings[_player] = SafeMath.add(playerWinnings[_player], winAmount);
 
-                uint winAmount = (postBet.betValue * 2) - 200000 wei;
-                contractBalance -= (postBet.betValue + postBet.setRandomPrice);
-                playerWinnings[_player] += winAmount;
-                emit callbackReceived(_queryId, "Winner", postBet.betValue);
-            } else {
-                //loser
-                //contractBalance = SafeMath.sub(SafeMath.add(contractBalance, postBet.betValue), (SafeMath.add(postBet.setRandomPrice, tx.gasprice)));
-                contractBalance -= postBet.setRandomPrice;
-                emit callbackReceived(_queryId, "Loser", postBet.betValue);
-            }
+            uint winAmount = (postBet.betValue * 2) - postBet.setRandomPrice;
+            contractBalance -= postBet.betValue;
+            playerWinnings[_player] += winAmount;
+            emit callbackReceived(_queryId, "Winner", postBet.betValue);
+        } else {
+            //loser
+            //contractBalance = SafeMath.sub(SafeMath.add(contractBalance, postBet.betValue), (SafeMath.add(postBet.setRandomPrice, tx.gasprice)));
+            contractBalance += (postBet.betValue - postBet.setRandomPrice);
+            emit callbackReceived(_queryId, "Loser", postBet.betValue);
         }
+    }
+    
+    //combine gas and randomTx fee
+    function getQueryPrice() internal returns(uint256 _price) {
+        _price = provable_getPrice("price", GAS_FOR_CALLBACK);
     }
     
     
