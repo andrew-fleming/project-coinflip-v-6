@@ -27,9 +27,11 @@ const AlignHalf = styled.div`
     width: 50%
 `;
 
-
+/**
+ * @notice The necessary data required for the dApp.
+ */
 const web3 = new Web3(Web3.givenProvider)
-const contractAddress = '0x95404f126eb6B2435E427f36eDee0bCe63472Bf5'
+const contractAddress = '0x0308c3A32E89cC7E294D07D4f356ad6b90dDd8E9'
 const coinflip = new web3.eth.Contract(Coinflip.abi, contractAddress)
 
 
@@ -81,13 +83,18 @@ export default function Main() {
     }, [setNetwork])
 
 
-    //app state necessary only in this component hence no 'AppContext'
+    /**
+     * @notice The following state hooks are used only within this functional
+     *         component; ergo, they're not included in useContext. 
+     */
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [outcomeMessage, setOutcomeMessage] = useState('');
    
-    //
-    //functions necessary to fetch onchain data and user info
-    //
+    
+    /**
+     * @notice The following functions fetch both the user's Ethereum data and
+     *         contract data. 
+     */
 
     const loadUserAddress = useCallback(async() => {
         let accounts = await web3.eth.getAccounts()
@@ -116,20 +123,13 @@ export default function Main() {
         setOwner(theOwner)
         return theOwner
     }, [setOwner])
-
-    /*
-    const checkOwner = useCallback((add, own) => {
-        if(add === own){
-            setIsOwner(true)
-        } else {
-            setIsOwner(false)
-        }
-    }, [setIsOwner])
-*/
     
-    //
-    //initialization
-    //
+    
+    /**
+     * @notice This function mimics the late React approach of componentDidMount; 
+     *         where, this acts as an initialization of the dApp by fetching the
+     *         user's Ether data.
+     */
 
     const componentDidMount = useCallback(async() => {
         await loadUserAddress().then(response => {
@@ -193,9 +193,19 @@ export default function Main() {
     }, [userAddress, owner, setIsOwner])
     
     
-     //
-     //set coinflip function with heads/tails functions
-     //
+
+     /**
+      * @notice The following function simulates the flipping of a coin. 
+      * 
+      * @dev    Upon receipt, the setSentQueryId state is set with the user's
+      *         query ID. Further, the awaiting callback repsonse state is set
+      *         with true which is responsible for looking through the blocks for
+      *         the user's query ID.
+      * 
+      * @param {*} oneZero The numeric representation of heads or tails—heads is zero, 
+      *                    tails is one.
+      * @param {*} bet The wagered amount.
+      */
 
      const flip = async(oneZero, bet) => {
         setAwaitingCallbackResponse(false)
@@ -206,20 +216,27 @@ export default function Main() {
             from: userAddress
         }
         coinflip.methods.flip(guess).send(config)
-        //set queryId to state
         .on('receipt', function(receipt){
             setSentQueryId(receipt.events.sentQueryId.returnValues[1])
             setAwaitingCallbackResponse(true)
         })
     }
 
-     //reset modal and message variable after closing modal
+     /**
+      * @notice This function closes the modal when the user hits 'okay,' and resets 
+      *         the outcome message to an empty string. 
+      */
      const modalMessageReset = () => {
         setModalIsOpen(false)
         setOutcomeMessage('')
     }
 
-    //watching contract events for callback
+    /**
+     * @notice This hook searches through Ethereum's blocks for the Provable query ID.
+     *         Once found, it looks for the event string 'Winner' or 'Loser' and updates 
+     *         the modal outcome message. Thereafter, it reloads the user's winnings
+     *         balance and contract balance. 
+     */
 
     useEffect(() => {
         if(awaitingCallbackResponse){
@@ -235,7 +252,8 @@ export default function Main() {
                     loadWinningsBalance(userAddress)
                     loadContractBalance()
                 }
-            } setAwaitingCallbackResponse(false) })
+            } setAwaitingCallbackResponse(false)
+         })
             setSentQueryId('')
         }
     }, [awaitingCallbackResponse, 
@@ -248,9 +266,26 @@ export default function Main() {
         userAddress])
 
 
-    //
-    //set owner functions
-    //
+
+    /**
+     * @notice This function withdraws the user's winnings balance into the user's
+     *         actual MetaMask wallet.
+     */
+
+    const withdrawUserWinnings = () => {
+        var balance = winningsBalance
+        coinflip.methods.withdrawUserWinnings().send(balance, {from: userAddress})
+        setAwaitingWithdrawal(true)
+    }
+
+  
+    /**
+     * @notice The following functions are reserved for the owner of the contract.
+     * 
+     * 
+     * @notice This function adds Ether to the contract.
+     * @param {*} x The amount of Ether to transfer into the contract balance.
+     */
 
     const fundContract = (x) => {
         let fundAmt = x
@@ -265,6 +300,12 @@ export default function Main() {
         })
     }
 
+    /**
+     * @notice This function adds Ether to the user's winnings balance. This is created
+     *         for testing purposes.
+     * 
+     * @param {*} x The amount of Ether to transfer to the mapping balance.
+     */
     const fundWinnings = (x) => {
         let fundAmt = x
         let config = {
@@ -278,6 +319,11 @@ export default function Main() {
         })
     }
 
+    /**
+     * @notice This function withdraws the entire contract balance to the owner.
+     * @dev    The contract balance does not include any users' winnings balances.
+     */
+
     const withdrawAll = () => {
         var balance = contractBalance
         coinflip.methods.withdrawAll().send(balance, {from: userAddress})
@@ -287,14 +333,12 @@ export default function Main() {
         })
     }
 
-    //user withdraw function
-    const withdrawUserWinnings = () => {
-        var balance = winningsBalance
-        coinflip.methods.withdrawUserWinnings().send(balance, {from: userAddress})
-        setAwaitingWithdrawal(true)
-    }
 
-    //waiting to display success and amount of withdrawal
+    /**
+     * @notice This hook communicates to the user when their withdrawal of funds from
+     *         their winnings balance succeeded. Upon receipt, their winnings balance and 
+     *         actual user balance reloads. 
+     */
     useEffect(() => {
         if(awaitingWithdrawal === true){
             coinflip.events.userWithdrawal({
@@ -310,9 +354,11 @@ export default function Main() {
     }, [awaitingWithdrawal, winningsBalance, userBalance, userAddress, loadUserBalance, loadWinningsBalance, setAwaitingWithdrawal])
 
 
-    //
-    //display message to user after withdrawals and oracle callbacks 
-    //
+    
+    /**
+     * @notice This hook controls the modal which tells the user whether they won/lost the coinflip or
+     *          the success of their withdrawal.
+     */
     useEffect(() => {
         if(outcomeMessage !== ''){
             setModalIsOpen(true)

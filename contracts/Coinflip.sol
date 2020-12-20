@@ -24,7 +24,7 @@ contract Coinflip is usingProvable {
 
     uint public contractBalance;
     
-    uint256 constant GAS_FOR_CALLBACK = 200000;
+    uint256 constant GAS_FOR_CALLBACK = 400000;
     uint256 constant NUM_RANDOM_BYTES_REQUESTED = 1;
     
    address payable public owner = msg.sender;
