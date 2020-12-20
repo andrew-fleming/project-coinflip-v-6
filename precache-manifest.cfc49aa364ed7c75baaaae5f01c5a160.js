@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "d8f58e936963e29217dff97d3f190d33",
+    "revision": "f678858324107be92601149397d15284",
     "url": "/project-coinflip-v-6/index.html"
   },
   {
-    "revision": "5b3df69f6703a8f46117",
+    "revision": "fb7d62cbc0c604d00c84",
     "url": "/project-coinflip-v-6/static/css/main.69eda509.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/project-coinflip-v-6/static/js/2.60ec43ab.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "5b3df69f6703a8f46117",
-    "url": "/project-coinflip-v-6/static/js/main.f6f8628c.chunk.js"
+    "revision": "fb7d62cbc0c604d00c84",
+    "url": "/project-coinflip-v-6/static/js/main.ec8eb33e.chunk.js"
   },
   {
     "revision": "a1d9ea927a180d8db3b6",
