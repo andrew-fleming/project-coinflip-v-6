@@ -24,12 +24,12 @@ contract Coinflip is usingProvable {
 
     uint public contractBalance;
     
-    uint256 constant GAS_FOR_CALLBACK = 400000;
+    uint256 constant GAS_FOR_CALLBACK = 200000;
     uint256 constant NUM_RANDOM_BYTES_REQUESTED = 1;
     
-   address payable public owner = msg.sender;
+    address payable public owner = msg.sender;
    
-   bool public freeCallback = true;
+    bool public freeCallback = true;
 
     constructor() public payable{
         owner = msg.sender;
@@ -41,11 +41,22 @@ contract Coinflip is usingProvable {
         _;
     }
     
-function flip(uint256 oneZero) public payable {
+    /**
+    *@notice This function simulates a coin flip which makes a call to the Provable oracle for 
+    *        a random number.
+    *@dev The function first checks if this is the very first call to the Provable oracle in order 
+    *     for the user to not pay for the first free call. This also adds user values to two different 
+    *     mappings: 'waiting' and 'afterWaiting.' Both mappings are necessary in order to bridge the 
+    *     user's address (which we has access to here with msg.sender) and the user's queryId sent from 
+    *     Provable after the function call. 
+    *
+    *@param oneZero - The numerical value of heads(0) or tails(1)
+     */
+
+    function flip(uint256 oneZero) public payable {
         require(contractBalance > msg.value, "We don't have enough funds");
         uint256 randomPrice;
 
-        //determine if this is first callback then declare Provable/gas price
         if(freeCallback == false){
             randomPrice = getQueryPrice();
         } else {
@@ -53,7 +64,6 @@ function flip(uint256 oneZero) public payable {
             randomPrice = 0;
         }
 
-        //Calling provable library function
         uint256 QUERY_EXECUTION_DELAY = 0;
         bytes32 queryId = provable_newRandomDSQuery(
             QUERY_EXECUTION_DELAY,
@@ -65,7 +75,6 @@ function flip(uint256 oneZero) public payable {
 
         afterWaiting[queryId] = msg.sender;
 
-        //Adding user to mapping with address, bet, and queryID
         Bet memory newBetter;
         newBetter.playerAddress = msg.sender;
         newBetter.betValue = msg.value; 
