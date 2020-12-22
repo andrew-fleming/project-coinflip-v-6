@@ -93,11 +93,7 @@ export default function Navbar() {
         network
     } = useContract()
 
-    //displaying only first/last five strings of userAddress
-    //const add1 = address.toString().split('').slice(0, 5).join('');
-   // const add2 = address.toString().split('').slice(37, 42).join('');
-    //const outputAddress = add1 + '...' + add2;
-    const address = userAddress ? userAddress.slice(0, 5) + '...' + userAddress.slice(38, 42) : null
+    const address = userAddress ? userAddress.slice(0, 5) + '...' + userAddress.slice(37, 42) : null
     
     return (
         <Nav>

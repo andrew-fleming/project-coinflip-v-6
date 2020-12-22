@@ -35,7 +35,6 @@ export default function Directions() {
     const [isActive, setIsActive] = useState(false);
 
      //toggle directions on/off
-     
     const hideDirections = () => {
         if(visible === true){
             setVisible(!visible)

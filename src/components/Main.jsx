@@ -131,22 +131,17 @@ export default function Main() {
      *         user's Ether data.
      */
 
-    const componentDidMount = useCallback(async() => {
+    const loadUserData = useCallback(async() => {
         await loadUserAddress().then(response => {
             setUserAddress(response)
             loadUserBalance(response)
             loadWinningsBalance(response)
             })
-        await loadOwner().then(response => {
-            setOwner(response)
-        })
     }, 
         [loadUserAddress, 
         setUserAddress, 
         loadUserBalance, 
-        loadWinningsBalance, 
-        loadOwner, 
-        setOwner,
+        loadWinningsBalance 
     ])
 
 
@@ -155,10 +150,10 @@ export default function Main() {
      *         
      */
     useEffect(() => {
-        if(userAddress === ''){
-            componentDidMount()
-        }
-    }, [componentDidMount, userAddress])
+       // if(userAddress === ''){
+            loadUserData()
+       // }
+    }, [loadUserData, userAddress])
 
 
 
@@ -167,16 +162,12 @@ export default function Main() {
      * 
      */
     useEffect(() => {
-        if(network.length === 0){
-            fetchNetwork()
-            loadContractBalance()
-            loadOwner().then(response => {
-                setOwner(response)
-            })
-
-        }
+        fetchNetwork()
+        loadContractBalance()
+        loadOwner().then(response => {
+            setOwner(response)
+        })
     }, [network, fetchNetwork, loadContractBalance, loadOwner, setOwner])
-
 
     /**
      * @notice This hook specifically checks if the user's address matches with 
@@ -256,14 +247,17 @@ export default function Main() {
          })
             setSentQueryId('')
         }
-    }, [awaitingCallbackResponse, 
+    }, [
+        userAddress,
+        awaitingCallbackResponse, 
         sentQueryId, 
         contractBalance, 
         loadContractBalance, 
         loadWinningsBalance, 
         setAwaitingCallbackResponse, 
-        setSentQueryId, 
-        userAddress])
+        setSentQueryId
+        ]
+    )
 
 
 
@@ -340,7 +334,7 @@ export default function Main() {
      *         actual user balance reloads. 
      */
     useEffect(() => {
-        if(awaitingWithdrawal === true){
+        if(awaitingWithdrawal){
             coinflip.events.userWithdrawal({
                 fromBlock:'latest'
             }, function(error, event){ if(event.returnValues[0] === userAddress){
