@@ -48,14 +48,16 @@ export default function Directions() {
      * 
      * @param {*event} The event parameter is included so the DOM doesn't rerender upon the onClick event.
      */
+
+
     const handleMetamask = (e) => {
         e.preventDefault()
-        window.open('https://metamask.io')
+        window.open(window.location.replace('https://metamask.io'))
     }
 
     const handleFaucet = (e) => {
         e.preventDefault()
-        window.open('https://faucet.dimensions.network/')
+        window.open(window.location.replace('https://faucet.dimensions.network/'))
     }
 
      //toggle directions on/off
