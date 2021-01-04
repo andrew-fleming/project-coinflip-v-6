@@ -28,11 +28,35 @@ const Li = styled.li`
     margin-top: 1.3rem;
 `;
 
+const Clickable = styled.span`
+    color: blue;
+    :hover {
+        cursor: pointer;
+        color: pink;
+    }
+`;
+
 
 export default function Directions() {
 
     const [visible, setVisible] = useState(false);
     const [isActive, setIsActive] = useState(false);
+
+    /**
+     * The following functions redirect the user to both MetaMask.io and a Ropsten Ether faucet
+     * respectively.
+     * 
+     * @param {*event} The event parameter is included so the DOM doesn't rerender upon the onClick event.
+     */
+    const handleMetamask = (e) => {
+        e.preventDefault()
+        window.open('https://metamask.io')
+    }
+
+    const handleFaucet = (e) => {
+        e.preventDefault()
+        window.open('https://faucet.dimensions.network/')
+    }
 
      //toggle directions on/off
     const hideDirections = () => {
@@ -44,16 +68,12 @@ export default function Directions() {
             }, 1400)
         }
     }
-        
-
-    const metamaskLink = <a href="metamask.io" >MetaMask</a>
-    const etherFaucet = <a href="faucet.metamask.io">Ether Faucet</a>
 
     const directions = visible ? 
     <> 
-        <Li>Install {metamaskLink} Browser Extension</Li>
+        <Li>Install <Clickable onClick={ handleMetamask } >MetaMask</Clickable> Browser Extension</Li>
         <Li>Select Ropsten Network</Li>
-        <Li>Go to the {etherFaucet} and request ETH</Li>
+        <Li>Go to an <Clickable onClick={ handleFaucet } >Ether faucet</Clickable> and request ETH</Li>
         <Li>Place your wager in our dApp</Li>
         <Li>Select Heads or Tails</Li>
         <Li>Wait for confirmations</Li>
