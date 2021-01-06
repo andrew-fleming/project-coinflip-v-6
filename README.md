@@ -12,4 +12,5 @@ Project Coinflip utilizes Ethereum smart contracts and a front-end built in Reac
 5. Initialize node.
 6. In the command line, run `truffle migrate`.
 7. Run `npm run start` to get the front end running.
-8. Make bets and flip some coins!
+8. Fetch the coinflip contract address from the build abi and replace the existing address inside of `../src/components/Main`
+9. Make bets and flip some coins!
