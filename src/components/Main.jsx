@@ -174,11 +174,13 @@ export default function Main() {
      *         the owner of the contract.
      */
     useEffect(() => {
-        if(userAddress.length !== 0 && owner.length !== 0){
-            if(userAddress === owner){
-                setIsOwner(true)
-            } else {
-                setIsOwner(false)
+        if(userAddress){
+            if(userAddress.length !== 0 && owner.length !== 0){
+                if(userAddress === owner){
+                    setIsOwner(true)
+                } else {
+                    setIsOwner(false)
+                }
             }
         }
     }, [userAddress, owner, setIsOwner])
